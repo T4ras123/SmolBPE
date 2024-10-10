@@ -77,7 +77,7 @@ with open("data/taylorswift.txt", "r") as f:
     text = f.read()
 
 t.train(text, 400)
-print(t.vocab)
+print(t.merges)
 t.encode("Hello World Taylor Swift:    ")
 t.decode([72,101,108,108,111,32,87,111,114,108,100])
 print(t.encoded_text)
