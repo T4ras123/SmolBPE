@@ -73,7 +73,7 @@ class BasicTokenizer():
 
 t = BasicTokenizer()
 
-with open("taylorswift.txt", "r") as f:
+with open("data/taylorswift.txt", "r") as f:
     text = f.read()
 
 t.train(text, 400)

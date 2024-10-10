@@ -1,4 +1,8 @@
-from text import text
+import sys
+import os
+sys.path.append(os.path.abspath('../data'))
+
+from data.text import text
 
 vocab = list(set(text))
 stoi = {ch:i for i, ch in enumerate(vocab)} 
