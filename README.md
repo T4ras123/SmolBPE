@@ -1,2 +1,2 @@
 # Tokenizer
-Leatning tokenization for Deep learning and LLms
+Learning tokenization for Deep learning and LLms
