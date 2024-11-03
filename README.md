@@ -1,20 +1,156 @@
 # SmolBPE
 
-Tokenization for Deep Learning and Large Language Models (LLMs).
-## Description
+## Overview
 
-SmolBPE is a repository focused on providing efficient tokenization techniques for deep learning and large language models. This project is composed primarily of Jupyter Notebooks and Python scripts.
+**SmolBPE** is a lightweight and efficient Byte Pair Encoding (BPE) tokenizer designed for deep learning applications and large language models (LLMs) such as GPT-4. It provides a simple interface to tokenize textual data, facilitating better handling of out-of-vocabulary words and improving the performance of language models.
 
 ## Features
 
-- Efficient tokenization algorithms.
+- **Efficient Tokenization**: Implements the BPE algorithm for effective subword tokenization.
+- **Customizable Vocabulary Size**: Allows you to specify the desired vocabulary size according to your needs.
+- **Unicode Support**: Handles a wide range of characters, including Unicode characters, enabling multilingual tokenization.
+- **Easy Integration**: Designed for seamless integration with existing Python projects and NLP pipelines.
+- **Command-Line Interface**: Provides a CLI tool for training and using the tokenizer without writing additional code.
+- **Open Source**: Licensed under the MIT License, promoting openness and collaboration.
 
----- 
+## Installation
 
-## Byte pair encoding
+You can install SmolBPE using `pip`:
 
-Byte pair encoding (also known as digram coding) is an algorithm, first described in 1994 by Philip Gage for encoding strings of text into tabular form for use in downstream modeling. Its modification is notable as the large language model tokenizer with an ability to combine both tokens that encode single characters (including single digits or single punctuation marks) and those that encode whole words (even the longest compound words). This modification, in the first step, assumes all unique characters to be an initial set of 1-character long n-grams (i.e. initial "tokens"). Then, successively, the most frequent pair of adjacent characters is merged into a new, 2-character long n-gram and all instances of the pair are replaced by this new token. This is repeated until a vocabulary of prescribed size is obtained. Note that new words can always be constructed from final vocabulary tokens and initial-set characters. This algorithmic approach has been extended from spoken language to sign language in recent years.
+```sh
+pip install smolbpe
+```
 
-All the unique tokens found in a corpus are listed in a token vocabulary, the size of which, in the case of GPT-3.5 and GPT-4, is 100256. 
+Alternatively, you can install it directly from the source code:
 
-![image](https://github.com/user-attachments/assets/27cf64e5-42a1-470b-baee-fc5a170bb4eb)
+```sh
+git clone https://github.com/T4ras123/SmolBPE.git
+cd SmolBPE
+pip install .
+```
+
+## Quick Start Guide
+
+### Using the Tokenizer in Python
+
+1.Importing the Tokenizer
+
+  ```python
+  from smolbpe.gpt4Tokenizer import GPT4Tokenizer
+  ```
+
+2.Initializing the Tokenizer
+
+  ```python
+  tokenizer = GPT4Tokenizer()
+  ```
+
+  You can specify a custom output file to save the vocab file to and regex pattern if needed:
+
+  ```python
+  tokenizer = GPT4Tokenizer(output='vocab.json', pattern=r"\p{L}+|\p{Z}+|\p{N}+|[\p{P}&&[^.]]")
+  ```
+
+3.Training the Tokenizer
+
+  Train the tokenizer on your dataset to build the vocabulary and merge rules:
+
+  ```python
+  with open("path_to_your_data", "r", encoding="utf-8") as f:
+      text = f.read()
+
+  tokenizer.train(text, vocab_size=400)
+  ```
+
+4.Encoding Text
+
+  Convert text into a list of token IDs:
+
+  ```python
+  encoded_tokens = tokenizer.encode("Tokenizing isn't real")
+  print(encoded_tokens)
+  ```
+
+5.Decoding Tokens
+
+Convert token IDs back into human-readable text:
+
+```python
+decoded_text = tokenizer.decode(encoded_tokens)
+print(decoded_text)
+```
+
+### Command-Line Interface
+
+SmolBPE provides a command-line interface for easy tokenization tasks.
+
+#### Training the Tokenizer
+
+```sh
+gpt4tokenizer --text data/taylorswift.txt --vocab_size 400 --output vocab.json
+```
+
+## Advanced Usage
+
+### Loading a Pre-trained Vocabulary
+
+If you have a pre-trained vocabulary and merges file, you can load them directly:
+
+```python
+tokenizer = GPT4Tokenizer()
+tokenizer.load_vocab('vocab.json')
+```
+
+### Custom Regex Pattern
+
+Customize the tokenization by providing a different regex pattern:
+
+```python
+custom_pattern = r"\w+|\s+|[^\s\w]+"
+tokenizer = GPT4Tokenizer(pattern=custom_pattern)
+```
+
+## Project Structure
+
+```sh
+SmolBPE/
+├── smolbpe/
+│   ├── __init__.py
+│   └── gpt4Tokenizer.py
+├── LICENSE
+├── MANIFEST.in
+├── README.md
+└── setup.py
+```
+
+## Contributing
+
+Contributions are welcome! To contribute:
+
+1. Fork the repository on GitHub.
+2. Create a new branch for your feature or bug fix.
+3. Commit your changes with descriptive commit messages.
+4. Push your branch to your forked repository.
+5. Open a pull request on the main repository.
+
+Please ensure your code adheres to the project's coding standards and includes appropriate tests.
+
+## License
+
+This project is licensed under the MIT License. You are free to use, modify, and distribute this software in accordance with the license.
+
+## Contact
+
+For any inquiries or feedback, please contact the author:
+
+- Author: Vover
+- Email: <vovatara123@gmail.com>
+- GitHub: [T4ras123](https://github.com/T4ras123)
+
+## Acknowledgments
+
+- Inspired by tokenization techniques used in GPT models.
+- Special thanks to the open-source community for continuous support.
+
+----
+Happy tokenizing with *SmolBPE*!

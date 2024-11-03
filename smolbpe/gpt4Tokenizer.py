@@ -4,12 +4,12 @@ import json
 
 
 class GPT4Tokenizer():
-    def __init__(self, path='vocab.json', pattern=None):
+    def __init__(self, output='vocab.json', pattern=None):
         self.vocab = {idx : bytes([idx]) for idx in range(256)}
         self.merges = dict()
         self.pattern = pattern if pattern else r"\p{L}+|\p{Z}+|\p{N}+|[\p{P}&&[^.]]"
         self.splitby = re.compile(self.pattern)
-        self.path = path
+        self.output_file = output
 
 
     def train(self, text, vocab_size):
@@ -68,7 +68,7 @@ class GPT4Tokenizer():
         return counts
 
 
-    def save_vocab_and_merges(self, path):
+    def save_vocab_and_merges(self):
         data = {
             'vocab': {},
             'merges': {}
@@ -83,7 +83,7 @@ class GPT4Tokenizer():
         for (first, second), idx in self.merges.items():
             key = f"{first},{second}"  # Convert tuple to string
             data['merges'][key] = idx
-        with open(path, 'w', encoding='utf-8') as f:
+        with open(self.output_file, 'w', encoding='utf-8') as f:
             json.dump(data, f, indent=2)
             
             

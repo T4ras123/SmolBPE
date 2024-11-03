@@ -2,11 +2,12 @@ from setuptools import setup, find_packages
 
 setup(
     name='smolbpe',
-    version='0.1.0',
+    version='0.2.0',
     description='A GPT-4 compatible Byte Pair Encoding (BPE) tokenizer.',
+    long_description=open('README.md').read(),
     author='Vover',
     author_email='vovatara123@gmail.com',
-    url='https://github.com/T4ras123/SmolBPE',  # Replace with your repository URL
+    url='https://github.com/T4ras123/SmolBPE',
     packages=find_packages(include=['smolbpe', 'smolbpe.*']),
     install_requires=[
         'regex>=2021.4.4',
