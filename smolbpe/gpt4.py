@@ -1,12 +1,15 @@
 import regex as re
+import argparse 
+import json
 
 
 class GPT4Tokenizer():
-    def __init__(self):
+    def __init__(self, path='vocab.json', pattern=None):
         self.vocab = {idx : bytes([idx]) for idx in range(256)}
         self.merges = dict()
-        self.pattern = r"""'(?i:[sdmt]|ll|ve|re)|[^\r\n\p{L}\p{N}]?+\p{L}+|\p{N}{1,3}| ?[^\s\p{L}\p{N}]++[\r\n]*|\s*[\r\n]|\s+(?!\S)|\s+"""
+        self.pattern = pattern if pattern else r"\p{L}+|\p{Z}+|\p{N}+|[\p{P}&&[^.]]"
         self.splitby = re.compile(self.pattern)
+        self.path = path
 
 
     def train(self, text, vocab_size):
@@ -28,20 +31,28 @@ class GPT4Tokenizer():
             ids = [self.merge(chunk_ids, pair, idx) for chunk_ids in ids]
             self.merges[pair] = idx
             self.vocab[idx] = self.vocab[pair[0]] + self.vocab[pair[1]]
+        self.save_vocab_and_merges(self.path)
+
 
     
     def encode(self, text):
-        tokens = list(text.encode("utf-8"))
-        while len(tokens)>=2:
-            bigrams = self.get_pairs(tokens)
-            pair = min(bigrams, key = lambda p: bigrams.get(p, float("inf")))
-            if pair not in self.merges:
-                break
-            idx = self.merges[pair]
-            tokens = self.merge(tokens, pair, idx)
-        return tokens
-    
+        ids = list(text.encode('utf-8'))
 
+        while True:
+            pairs = self.get_pairs(ids)
+            mergeable_pairs = {p: self.merges[p] for p in pairs if p in self.merges}
+
+
+            if not mergeable_pairs:
+                break
+
+            pair = min(mergeable_pairs, key=self.merges.get)
+
+            ids = self.merge(ids, pair, self.merges[pair])
+
+        return ids
+    
+    
     def decode(self, ids):
         tokens = b"".join(self.vocab[idx] for idx in ids)
         text = tokens.decode("utf-8", errors="replace")
@@ -57,6 +68,41 @@ class GPT4Tokenizer():
         return counts
 
 
+    def save_vocab_and_merges(self, path):
+        data = {
+            'vocab': {},
+            'merges': {}
+        }
+        # Save vocab
+        for idx, byte_val in self.vocab.items():
+            try:
+                data['vocab'][str(idx)] = byte_val.decode('utf-8')
+            except UnicodeDecodeError:
+                data['vocab'][str(idx)] = byte_val.hex()
+        # Save merges
+        for (first, second), idx in self.merges.items():
+            key = f"{first},{second}"  # Convert tuple to string
+            data['merges'][key] = idx
+        with open(path, 'w', encoding='utf-8') as f:
+            json.dump(data, f, indent=2)
+            
+            
+    def load_vocab(self, path='vocab.json'):
+        with open(path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        # Load vocab
+        self.vocab = {}
+        for idx_str, value in data['vocab'].items():
+            idx = idx_str
+            self.vocab[idx] = value.encode('utf-8')
+        # Load merges
+        self.merges = {}
+        for pair_str, idx in data['merges'].items():
+            first_str, second_str = pair_str.split(',')
+            first, second = int(first_str), int(second_str)
+            self.merges[(first, second)] = idx
+    
+    
     def merge(self, ids, pair, idx):
         id = 0
         newids = []
@@ -70,11 +116,16 @@ class GPT4Tokenizer():
         return newids
 
 
-t = GPT4Tokenizer()
-
-with open("./data/taylorswift.txt", "r") as f:
-    text = f.read()
-
-t.train(text, 400)
-print(t.vocab)
-print(t.decode(t.encode("Hello world")))
+if __name__=='__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-t', '--text', type=str, help='Text to train tokenizer on')
+    parser.add_argument('-v','--vocab_size', type=int, help='Vocab size for tokenizer')
+    parser.add_argument('-o', '--output', default='vocab.json', type=str, help='Output path for vocab and merges')
+    parser.add_argument('-p', '--pattern', type=str, help='Regex pattern to split text')
+    args = parser.parse_args()
+    
+    with open(args.text, 'r') as f:
+        args.text = f.read()
+    
+    tokenizer = GPT4Tokenizer(args.output, args.pattern)
+    tokenizer.train(args.text, args.vocab_size)
