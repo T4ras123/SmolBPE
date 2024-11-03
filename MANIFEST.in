@@ -1,0 +1,2 @@
+include smolbpe/data/*.txt
+include smolbpe/data/*.json
