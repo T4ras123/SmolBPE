@@ -5,8 +5,8 @@ setup(
     version='0.1.0',
     description='A GPT-4 compatible Byte Pair Encoding (BPE) tokenizer.',
     author='Vover',
-    author_email='your.email@example.com',
-    url='https://github.com/yourusername/gpt4tokenizer',  # Replace with your repository URL
+    author_email='vovatara123@gmail.com',
+    url='https://github.com/T4ras123/SmolBPE',  # Replace with your repository URL
     packages=find_packages(include=['smolbpe', 'smolbpe.*']),
     install_requires=[
         'regex>=2021.4.4',
@@ -23,7 +23,7 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'gpt4tokenizer=smolbpe.gpt4Tokenizer:main',  # If you have a main function
+            'gpt4tokenizer=smolbpe.gpt4Tokenizer:main', 
         ],
     },
 )
