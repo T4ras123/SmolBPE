@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='gpt4tokenizer',
+    name='smolbpe',
     version='0.1.0',
     description='A GPT-4 compatible Byte Pair Encoding (BPE) tokenizer.',
     author='Vover',
