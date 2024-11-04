@@ -4,10 +4,10 @@ import json
 
 
 class GPT4Tokenizer():
-    def __init__(self, output='vocab.json', pattern=None, special_tokens=None):
+    def __init__(self, output='vocab.json', special_tokens=None, pattern=r"""'(?i:[sdmt]|ll|ve|re)|[^\r\n\p{L}\p{N}]?+\p{L}+|\p{N}{1,3}| ?[^\s\p{L}\p{N}]++[\r\n]*|\s*[\r\n]|\s+(?!\S)|\s+"""):
         self.vocab = {idx : bytes([idx]) for idx in range(256)}
         self.merges = dict()
-        self.pattern = pattern if pattern else r"."
+        self.pattern = pattern
         self.splitby = re.compile(self.pattern)
         self.output_file = output
         self.special_tokens = special_tokens if special_tokens else []
@@ -142,15 +142,15 @@ class GPT4Tokenizer():
 if __name__=='__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-t', '--text', type=str, help='Text to train tokenizer on')
-    parser.add_argument('-v','--vocab_size', type=int, help='Vocab size for tokenizer')
+    parser.add_argument('-v', '--vocab_size', type=int, help='Vocab size for tokenizer')
     parser.add_argument('-o', '--output', default='vocab.json', type=str, help='Output path for vocab and merges')
-    parser.add_argument('-p', '--pattern', type=str, help='Regex pattern to split text')
+    parser.add_argument('-p', '--pattern', type=str, default=r"""'(?i:[sdmt]|ll|ve|re)|[^\r\n\p{L}\p{N}]?+\p{L}+|\p{N}{1,3}| ?[^\s\p{L}\p{N}]++[\r\n]*|\s*[\r\n]|\s+(?!\S)|\s+""", help='Regex pattern to split text')
     parser.add_argument('-s', '--special_tokens', nargs='*', default=None, help='Special tokens to add to vocab')
     args = parser.parse_args()
     
     with open(args.text, 'r') as f:
         args.text = f.read()
     print(args.special_tokens)
-    tokenizer = GPT4Tokenizer(args.output, args.pattern, special_tokens=args.special_tokens)
+    tokenizer = GPT4Tokenizer(args.output, special_tokens=args.special_tokens, pattern=args.pattern)
     tokenizer.train(args.text, args.vocab_size)
     print(f"Tokenizer trained and saved to {args.output}")
