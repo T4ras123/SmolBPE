@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='smolbpe',
-    version='0.3.1',
+    version='0.3.2',
     description='A GPT-4 compatible Byte Pair Encoding (BPE) tokenizer.',
     long_description=open('README.md', encoding='utf-8').read(),
     long_description_content_type='text/markdown', 

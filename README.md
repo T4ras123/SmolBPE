@@ -112,6 +112,15 @@ custom_pattern = r"\w+|\s+|[^\s\w]+"
 tokenizer = Tokenizer(pattern=custom_pattern)
 ```
 
+### Custom special tokens
+
+Add custom special tokens that appear in your dataset
+
+```python
+special_tokens = ['<|start_text|>', '<|good_luck|>']
+tokenizer = Tokenizer(special_tokens=special_tokens)
+```
+
 ## Project Structure
 
 ```sh

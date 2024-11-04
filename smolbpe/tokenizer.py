@@ -4,13 +4,13 @@ import json
 
 
 class Tokenizer():
-    def __init__(self, output='vocab.json', special_tokens=None, pattern=r"""'(?i:[sdmt]|ll|ve|re)|[^\r\n\p{L}\p{N}]?+\p{L}+|\p{N}{1,3}| ?[^\s\p{L}\p{N}]++[\r\n]*|\s*[\r\n]|\s+(?!\S)|\s+"""):
+    def __init__(self, output='vocab.json', special_tokens=[], pattern=r"""'(?i:[sdmt]|ll|ve|re)|[^\r\n\p{L}\p{N}]?+\p{L}+|\p{N}{1,3}| ?[^\s\p{L}\p{N}]++[\r\n]*|\s*[\r\n]|\s+(?!\S)|\s+"""):
         self.vocab = {idx : bytes([idx]) for idx in range(256)}
         self.merges = dict()
         self.pattern = pattern
         self.splitby = re.compile(self.pattern)
         self.output_file = output
-        self.special_tokens = special_tokens if special_tokens else []
+        self.special_tokens = special_tokens
         self.special_token_ids = {}
         for i, token in enumerate(self.special_tokens):
             token_id = 256 + i
