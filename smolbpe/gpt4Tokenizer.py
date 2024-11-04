@@ -20,8 +20,7 @@ class GPT4Tokenizer():
 
 
     def train(self, text, vocab_size):
-
-        
+ 
         assert vocab_size > len(self.vocab), "Vocab size must be greater than the number of tokens in the vocab"
         num_merges = vocab_size - len(self.vocab)
         text_splitted = re.findall(self.splitby, text)
@@ -47,7 +46,6 @@ class GPT4Tokenizer():
         i = 0
         while i < len(text):
             matched = False
-            # Check for special tokens at the current position
             for token in self.special_tokens:
                 if text.startswith(token, i):
                     token_id = self.special_token_ids[token]
@@ -56,12 +54,9 @@ class GPT4Tokenizer():
                     matched = True
                     break
             if not matched:
-                # Find the next special token position
                 next_positions = [text.find(st, i) for st in self.special_tokens if text.find(st, i) != -1]
                 next_special = min(next_positions) if next_positions else len(text)
-                # Extract substring up to the next special token
                 substring = text[i:next_special]
-                # Encode the substring using BPE
                 ids = list(substring.encode('utf-8'))
                 ids = self.apply_bpe(ids)
                 tokens.extend(ids)
@@ -120,12 +115,10 @@ class GPT4Tokenizer():
     def load_vocab(self, path='vocab.json'):
         with open(path, 'r', encoding='utf-8') as f:
             data = json.load(f)
-        # Load vocab
         self.vocab = {}
         for idx_str, value in data['vocab'].items():
             idx = idx_str
             self.vocab[idx] = value.encode('utf-8')
-        # Load merges
         self.merges = {}
         for pair_str, idx in data['merges'].items():
             first_str, second_str = pair_str.split(',')
