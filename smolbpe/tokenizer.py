@@ -3,7 +3,7 @@ import argparse
 import json
 
 
-class GPT4Tokenizer():
+class Tokenizer():
     def __init__(self, output='vocab.json', special_tokens=None, pattern=r"""'(?i:[sdmt]|ll|ve|re)|[^\r\n\p{L}\p{N}]?+\p{L}+|\p{N}{1,3}| ?[^\s\p{L}\p{N}]++[\r\n]*|\s*[\r\n]|\s+(?!\S)|\s+"""):
         self.vocab = {idx : bytes([idx]) for idx in range(256)}
         self.merges = dict()
@@ -151,6 +151,6 @@ if __name__=='__main__':
     with open(args.text, 'r') as f:
         args.text = f.read()
     print(args.special_tokens)
-    tokenizer = GPT4Tokenizer(args.output, special_tokens=args.special_tokens, pattern=args.pattern)
+    tokenizer = Tokenizer(args.output, special_tokens=args.special_tokens, pattern=args.pattern)
     tokenizer.train(args.text, args.vocab_size)
     print(f"Tokenizer trained and saved to {args.output}")

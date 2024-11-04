@@ -38,19 +38,19 @@ pip install .
 1.Importing the Tokenizer
 
   ```python
-  from smolbpe.gpt4Tokenizer import GPT4Tokenizer
+  from smolbpe.tokenizer import Tokenizer
   ```
 
 2.Initializing the Tokenizer
 
   ```python
-  tokenizer = GPT4Tokenizer()
+  tokenizer = Tokenizer()
   ```
 
   You can specify a custom output file to save the vocab file to and regex pattern if needed:
 
   ```python
-  tokenizer = GPT4Tokenizer(output='vocab.json', pattern=r"\p{L}+|\p{Z}+|\p{N}+|[\p{P}&&[^.]]")
+  tokenizer = Tokenizer(output='vocab.json', pattern=r"\p{L}+|\p{Z}+|\p{N}+|[\p{P}&&[^.]]")
   ```
 
 3.Training the Tokenizer
@@ -89,7 +89,7 @@ SmolBPE provides a command-line interface for easy tokenization tasks.
 #### Training the Tokenizer
 
 ```sh
-gpt4tokenizer --text data/taylorswift.txt --vocab_size 400 --output vocab.json
+tokenizer --text smth.txt --vocab_size 400 --output vocab.json 
 ```
 
 ## Advanced Usage
@@ -99,7 +99,7 @@ gpt4tokenizer --text data/taylorswift.txt --vocab_size 400 --output vocab.json
 If you have a pre-trained vocabulary and merges file, you can load them directly:
 
 ```python
-tokenizer = GPT4Tokenizer()
+tokenizer = Tokenizer()
 tokenizer.load_vocab('vocab.json')
 ```
 
@@ -109,7 +109,7 @@ Customize the tokenization by providing a different regex pattern:
 
 ```python
 custom_pattern = r"\w+|\s+|[^\s\w]+"
-tokenizer = GPT4Tokenizer(pattern=custom_pattern)
+tokenizer = Tokenizer(pattern=custom_pattern)
 ```
 
 ## Project Structure
@@ -118,7 +118,7 @@ tokenizer = GPT4Tokenizer(pattern=custom_pattern)
 SmolBPE/
 ├── smolbpe/
 │   ├── __init__.py
-│   └── gpt4Tokenizer.py
+│   └── tokenizer.py
 ├── LICENSE
 ├── MANIFEST.in
 ├── README.md
