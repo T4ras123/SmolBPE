@@ -164,3 +164,5 @@ cython_debug/
 
 
 .vscode/*
+smolbpe/text.txt
+smolbpe/vocab.json

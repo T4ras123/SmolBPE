@@ -4,54 +4,84 @@ import json
 
 
 class GPT4Tokenizer():
-    def __init__(self, output='vocab.json', pattern=None):
+    def __init__(self, output='vocab.json', pattern=None, special_tokens=None):
         self.vocab = {idx : bytes([idx]) for idx in range(256)}
         self.merges = dict()
-        self.pattern = pattern if pattern else r"\p{L}+|\p{Z}+|\p{N}+|[\p{P}&&[^.]]"
+        self.pattern = pattern if pattern else r"."
         self.splitby = re.compile(self.pattern)
         self.output_file = output
+        self.special_tokens = special_tokens if special_tokens else []
+        self.special_token_ids = {}
+        for i, token in enumerate(self.special_tokens):
+            token_id = 256 + i
+            self.vocab[token_id] = token.encode('utf-8')
+            self.merges[(token_id, token_id)] = token_id
+            self.special_token_ids[token] = token_id
 
 
     def train(self, text, vocab_size):
 
-        assert vocab_size >= 256
-
-        num_merges = vocab_size - 256
-
+        
+        assert vocab_size > len(self.vocab), "Vocab size must be greater than the number of tokens in the vocab"
+        num_merges = vocab_size - len(self.vocab)
         text_splitted = re.findall(self.splitby, text)
-
-        ids = [list(ch.encode("utf-8")) for ch in text_splitted]
-
+        ids = [list(self.encode(chunk)) for chunk in text_splitted]
+        vocab_len = max(self.vocab.keys()) + 1
         for i in range(num_merges):
             stats = {}
             for _ in ids:
                 self.get_pairs(_, stats)
+            if not stats:
+                print(f"No more pairs to merge at iteration {i}. Stopping early.")
+                break
             pair = max(stats, key=stats.get)
-            idx = 256 + i
-            ids = [self.merge(chunk_ids, pair, idx) for chunk_ids in ids]
+            idx = vocab_len + i
             self.merges[pair] = idx
             self.vocab[idx] = self.vocab[pair[0]] + self.vocab[pair[1]]
-        self.save_vocab_and_merges(self.path)
-
+            ids = [self.merge(chunk_ids, pair, idx) for chunk_ids in ids]
+        self.save_vocab_and_merges(self.output_file)
 
     
     def encode(self, text):
-        ids = list(text.encode('utf-8'))
-
+        tokens = []
+        i = 0
+        while i < len(text):
+            matched = False
+            # Check for special tokens at the current position
+            for token in self.special_tokens:
+                if text.startswith(token, i):
+                    token_id = self.special_token_ids[token]
+                    tokens.append(token_id)
+                    i += len(token)
+                    matched = True
+                    break
+            if not matched:
+                # Find the next special token position
+                next_positions = [text.find(st, i) for st in self.special_tokens if text.find(st, i) != -1]
+                next_special = min(next_positions) if next_positions else len(text)
+                # Extract substring up to the next special token
+                substring = text[i:next_special]
+                # Encode the substring using BPE
+                ids = list(substring.encode('utf-8'))
+                ids = self.apply_bpe(ids)
+                tokens.extend(ids)
+                i = next_special
+        return tokens
+    
+    
+    def apply_bpe(self, ids):
         while True:
             pairs = self.get_pairs(ids)
             mergeable_pairs = {p: self.merges[p] for p in pairs if p in self.merges}
-
 
             if not mergeable_pairs:
                 break
 
             pair = min(mergeable_pairs, key=self.merges.get)
-
             ids = self.merge(ids, pair, self.merges[pair])
 
         return ids
-    
+        
     
     def decode(self, ids):
         tokens = b"".join(self.vocab[idx] for idx in ids)
@@ -68,7 +98,7 @@ class GPT4Tokenizer():
         return counts
 
 
-    def save_vocab_and_merges(self):
+    def save_vocab_and_merges(self, path):
         data = {
             'vocab': {},
             'merges': {}
@@ -81,9 +111,9 @@ class GPT4Tokenizer():
                 data['vocab'][str(idx)] = byte_val.hex()
         # Save merges
         for (first, second), idx in self.merges.items():
-            key = f"{first},{second}"  # Convert tuple to string
+            key = f"{first},{second}" 
             data['merges'][key] = idx
-        with open(self.output_file, 'w', encoding='utf-8') as f:
+        with open(path, 'w', encoding='utf-8') as f:
             json.dump(data, f, indent=2)
             
             
@@ -122,10 +152,12 @@ if __name__=='__main__':
     parser.add_argument('-v','--vocab_size', type=int, help='Vocab size for tokenizer')
     parser.add_argument('-o', '--output', default='vocab.json', type=str, help='Output path for vocab and merges')
     parser.add_argument('-p', '--pattern', type=str, help='Regex pattern to split text')
+    parser.add_argument('-s', '--special_tokens', nargs='*', default=None, help='Special tokens to add to vocab')
     args = parser.parse_args()
     
     with open(args.text, 'r') as f:
         args.text = f.read()
-    
-    tokenizer = GPT4Tokenizer(args.output, args.pattern)
+    print(args.special_tokens)
+    tokenizer = GPT4Tokenizer(args.output, args.pattern, special_tokens=args.special_tokens)
     tokenizer.train(args.text, args.vocab_size)
+    print(f"Tokenizer trained and saved to {args.output}")
